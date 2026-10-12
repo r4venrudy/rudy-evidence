@@ -115,6 +115,8 @@ No CVSS scores are invented. No semantic cross-scanner deduplication is attempte
 
 The tests exercise adapters, malformed inputs, deterministic identity/merge behavior, redaction, SARIF round trips, C memory ownership and concurrent calls. CI covers Linux, Windows and macOS, C# and Python bindings, installed consumers, sanitizer checks and a bounded fuzz run. Workflow status is the evidence for which CI jobs have passed.
 
+The [recorded Windows synthetic benchmark](docs/benchmark-windows.json) processed 10,000 minimal findings in a median 0.47 seconds across five runs, including process startup and pipe I/O. Reproduce with `python tests/benchmark.py build/rudy-evidence`. This is a workload-specific measurement, not a general throughput guarantee. The optional `tests/sarif_schema.py` check downloads a pinned [official OASIS schema](https://github.com/oasis-tcs/sarif-spec/blob/25eb7663ad3ac54338b4f6a00a7004995e32e6da/sarif-2.1/schema/sarif-schema-2.1.0.json) and requires development dependency `jsonschema==4.25.1`; the core and normal build stay offline.
+
 ```sh
 python tests/verify_vendor.py
 cmake -S . -B build-asan -DRE_SANITIZERS=ON -DCMAKE_BUILD_TYPE=Debug

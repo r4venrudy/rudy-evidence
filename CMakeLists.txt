@@ -72,6 +72,8 @@ if(RE_BUILD_TESTS)
   target_link_libraries(c-api-tests PRIVATE re_capi)
   add_test(NAME c-api-ownership COMMAND c-api-tests)
   if(RE_SANITIZERS AND NOT MSVC)
+    # UBSan vptr instrumentation in the C++ shared library needs the C++ runtime.
+    set_target_properties(c-api-tests PROPERTIES LINKER_LANGUAGE CXX)
     foreach(t core-tests c-api-tests)
       target_compile_options(${t} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
       target_link_options(${t} PRIVATE -fsanitize=address,undefined)
