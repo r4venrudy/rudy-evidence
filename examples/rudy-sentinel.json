@@ -1,0 +1,13 @@
+[
+  {
+    "kind": "alert",
+    "rule_id": "RS.EXAMPLE",
+    "title": "Synthetic behavioral signal",
+    "severity": "high",
+    "process_id": "123:10",
+    "sequence": 15,
+    "mitre": "T1059",
+    "image": "example.exe",
+    "interpretation": "Behavioral signal requiring investigation; not a malware verdict."
+  }
+]

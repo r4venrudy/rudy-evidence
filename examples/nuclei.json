@@ -1,0 +1,9 @@
+{
+  "template-id": "example-config",
+  "matched-at": "https://example.test/",
+  "info": {
+    "name": "Example configuration",
+    "severity": "medium"
+  },
+  "matcher-name": "fixture"
+}

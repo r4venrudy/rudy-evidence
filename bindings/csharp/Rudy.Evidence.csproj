@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <PackageId>Rudy.Evidence</PackageId>
+    <Version>0.1.0</Version>
+    <Description>C# binding to the Rudy Evidence native security evidence SDK.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/r4venrudy/rudy-evidence</RepositoryUrl>
+  </PropertyGroup>
+</Project>

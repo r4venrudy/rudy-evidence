@@ -1,0 +1,24 @@
+{
+  "findings": [
+    {
+      "producer": "example",
+      "rule_id": "CONFIG.001",
+      "title": "Review setting",
+      "severity": "medium",
+      "asset": {
+        "kind": "file",
+        "id": "src/main.cpp"
+      },
+      "location": {
+        "path": "src/main.cpp",
+        "line": 9
+      },
+      "evidence": [
+        "Observed value"
+      ],
+      "identifiers": [
+        "CWE-16"
+      ]
+    }
+  ]
+}

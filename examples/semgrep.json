@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "check_id": "example.rule",
+      "path": "src/main.cpp",
+      "start": {
+        "line": 9
+      },
+      "extra": {
+        "message": "Review setting",
+        "severity": "WARNING",
+        "metadata": {
+          "cwe": [
+            "CWE-16"
+          ]
+        }
+      }
+    }
+  ]
+}

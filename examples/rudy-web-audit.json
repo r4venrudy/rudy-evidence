@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "tool": "Rudy Web Audit",
+  "targets": [
+    {
+      "target": "https://example.test/",
+      "checks": [
+        {
+          "id": "HTTP.EXAMPLE",
+          "title": "Example check",
+          "status": "warn",
+          "severity": "medium",
+          "evidence": "Synthetic evidence",
+          "hop": 0
+        },
+        {
+          "id": "HTTP.PASS",
+          "title": "Passing check",
+          "status": "pass",
+          "severity": "info"
+        }
+      ]
+    }
+  ]
+}

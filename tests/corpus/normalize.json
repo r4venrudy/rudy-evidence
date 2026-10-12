@@ -1,0 +1,1 @@
+{"operation":"normalize","format":"native","scope":"fixture","document":{"findings":[{"producer":"example","rule_id":"TEST","title":"Synthetic","severity":"medium","asset":{"kind":"file","id":"example.cpp"}}]}}

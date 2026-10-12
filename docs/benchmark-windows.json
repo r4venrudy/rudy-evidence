@@ -1,0 +1,16 @@
+{
+  "platform": "Windows x64",
+  "compiler": "Clang 23.1.3 / Release / portable BLAKE3",
+  "records": 10000,
+  "runs": 5,
+  "input_bytes": 1528996,
+  "elapsed_seconds": [
+    0.5076510999933816,
+    0.47088540002005175,
+    0.4350249000126496,
+    0.45802320004440844,
+    0.49907830002484843
+  ],
+  "median_seconds": 0.47088540002005175,
+  "includes": "Process startup, input/output pipes, normalization; synthetic minimal findings; not a throughput guarantee"
+}

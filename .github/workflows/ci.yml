@@ -1,0 +1,57 @@
+name: Native SDK
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  contract:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: python tests/verify_vendor.py
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build --config Release --parallel 2
+      - run: ctest --test-dir build -C Release --output-on-failure
+      - run: cmake --install build --config Release --prefix install
+      - run: cmake -S examples/consumer -B build-consumer -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install"
+      - run: cmake --build build-consumer --config Release --parallel 2
+      - name: Bindings and installed consumers
+        shell: bash
+        run: |
+          export PATH="$PWD/install/bin:$PATH"
+          export LD_LIBRARY_PATH="$PWD/install/lib:${LD_LIBRARY_PATH:-}"
+          export DYLD_LIBRARY_PATH="$PWD/install/lib:${DYLD_LIBRARY_PATH:-}"
+          case "$RUNNER_OS" in
+            Windows) export RUDY_EVIDENCE_LIBRARY="$(cygpath -w "$PWD/install/bin/rudy_evidence.dll")" ;;
+            macOS) export RUDY_EVIDENCE_LIBRARY="$PWD/install/lib/librudy_evidence.dylib" ;;
+            *) export RUDY_EVIDENCE_LIBRARY="$PWD/install/lib/librudy_evidence.so" ;;
+          esac
+          ctest --test-dir build-consumer -C Release --output-on-failure
+          python tests/python_binding.py
+          dotnet run --project tests/dotnet -c Release
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rudy-evidence-${{ runner.os }}-${{ runner.arch }}
+          path: install/
+          if-no-files-found: error
+  sanitizer-fuzz:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - run: cmake -S . -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DRE_SANITIZERS=ON -DRE_FUZZ=ON
+      - run: cmake --build build --parallel 2
+      - run: ctest --test-dir build --output-on-failure
+      - run: mkdir -p corpus && cp tests/corpus/* corpus/ && build/evidence-fuzz corpus -max_total_time=45 -timeout=5 -max_len=65536

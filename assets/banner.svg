@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+<title id="title">RUDY / EVIDENCE</title><desc id="desc">A common language for security findings. Native core. Shared contract. Offline by design.</desc>
+<rect width="1280" height="360" fill="#0a1118"/>
+<path d="M0 359H1280M64 62H1216" stroke="#24333d"/>
+<g fill="none" stroke="#55e0b6" stroke-width="2"><rect x="1040" y="105" width="98" height="98" rx="4"/><rect x="1088" y="153" width="98" height="98" rx="4"/><path d="M1064 134H1114M1064 151H1093M1112 218H1162M1112 235H1142"/></g>
+<text x="64" y="42" font-family="monospace" font-size="14" letter-spacing="4" fill="#55e0b6">RUDY SYSTEMS / OPEN SOURCE</text>
+<text x="64" y="155" font-family="Arial,sans-serif" font-size="68" font-weight="700" fill="#edf4f7">RUDY <tspan fill="#55e0b6">/ EVIDENCE</tspan></text>
+<text x="68" y="210" font-family="Arial,sans-serif" font-size="25" fill="#b7c6ce">A common language for security findings.</text>
+<text x="68" y="296" font-family="monospace" font-size="15" letter-spacing="2" fill="#55e0b6">NATIVE CORE  /  SHARED CONTRACT  /  OFFLINE BY DESIGN</text>
+</svg>

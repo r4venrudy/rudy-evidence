@@ -1,0 +1,8 @@
+/build*/
+/dist/
+/install/
+**/bin/
+**/obj/
+__pycache__/
+*.pyc
+*.user
