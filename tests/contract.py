@@ -6,6 +6,7 @@ import pathlib
 import random
 import subprocess
 import sys
+import tempfile
 import unittest
 
 CLI, DLL = sys.argv[1:3]
@@ -213,6 +214,14 @@ class Contract(unittest.TestCase):
         for args, code in [(["nonsense"], 2), (["validate", "missing-report.json"], 1), (["--version"], 0), (["--help"], 0)]:
             p = subprocess.run([CLI, *args], capture_output=True, timeout=30)
             self.assertEqual(p.returncode, code, p.stderr)
+
+    def test_unicode_file_paths_and_scope(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = pathlib.Path(temp) / "Türkçe-日本語.json"
+            path.write_text(json.dumps({"findings": [seed()]}), encoding="utf-8")
+            p = subprocess.run([CLI, "normalize", "native", "repo:Türkçe-日本語", str(path)], capture_output=True, timeout=30)
+            self.assertEqual(p.returncode, 0, p.stderr)
+            self.assertEqual(json.loads(p.stdout)["findings"][0]["scope"], "repo:Türkçe-日本語")
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

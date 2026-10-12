@@ -2,10 +2,15 @@
 #include <nlohmann/json.hpp>
 #include <array>
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <shellapi.h>
 #include <fcntl.h>
 #include <io.h>
 #endif
@@ -13,7 +18,7 @@ namespace {
 using J = nlohmann::json;
 std::string read(const std::string& path) {
     std::ifstream file;
-    if (path != "-") { file.open(path, std::ios::binary); if (!file) throw rudy::evidence::Error("Cannot open input file"); }
+    if (path != "-") { file.open(std::filesystem::path(std::u8string(path.begin(), path.end())), std::ios::binary); if (!file) throw rudy::evidence::Error("Cannot open input file"); }
     std::istream& in = path == "-" ? std::cin : file;
     std::string result; std::array<char, 8192> bytes{};
     while (in) {
@@ -41,6 +46,19 @@ int main(int argc, char** argv) {
 #endif
     try {
         std::vector<std::string> a(argv + 1, argv + argc);
+#ifdef _WIN32
+        int count = 0; auto wide = CommandLineToArgvW(GetCommandLineW(), &count);
+        if (!wide) throw rudy::evidence::Error("Cannot read command line");
+        a.clear();
+        for (int i = 1; i < count; ++i) {
+            int bytes = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, wide[i], -1, nullptr, 0, nullptr, nullptr);
+            if (!bytes) { LocalFree(wide); throw rudy::evidence::Error("Invalid command line encoding"); }
+            std::string value(static_cast<std::size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, wide[i], -1, value.data(), bytes, nullptr, nullptr);
+            value.pop_back(); a.push_back(std::move(value));
+        }
+        LocalFree(wide);
+#endif
         if (a.empty() || a[0] == "--help") { help(); return 0; }
         if (a[0] == "--version" && a.size() == 1) { std::cout << rudy::evidence::version << '\n'; return 0; }
         std::string req;
