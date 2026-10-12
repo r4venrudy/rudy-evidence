@@ -145,6 +145,17 @@ class Contract(unittest.TestCase):
 
     def test_invalid_ndjson_fails_whole_batch(self):
         call(dict(operation="normalize-lines", format="nuclei", scope="test", text='{}\n{"bad"'), False)
+        row = {"template-id": "test", "matched-at": "https://example.test", "info": {"name": "Fixture", "severity": "high"}}
+        call(dict(operation="normalize-lines", format="nuclei", scope="test", text=json.dumps(row) + '\x00ignored'), False)
+
+    def test_sarif_identity_is_not_inferred_from_asset_spelling(self):
+        for kind in ["file", "other"]:
+            row = seed(); row["asset"] = {"kind": kind, "id": "unlocated"}; row.pop("location")
+            bundle = normal([row]); exported = call(dict(operation="sarif", document=bundle))
+            if kind == "file":
+                self.assertEqual(exported["runs"][0]["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"]["uri"], "unlocated")
+            back = call(dict(operation="normalize", format="sarif", scope="test", document=exported))
+            self.assertEqual(bundle["findings"], back["findings"])
 
     def test_rejects_missing_scope(self):
         call(dict(operation="normalize", format="native", document={"findings": []}), False)

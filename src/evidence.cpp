@@ -37,6 +37,7 @@ std::string digest(std::string_view data) {
 }
 J parse(std::string_view input) {
     require(input.size() <= max_input_bytes, "Input exceeds 16 MiB");
+    require(input.find('\0') == std::string_view::npos, "NUL byte in JSON input");
     std::vector<std::set<std::string>> keys;
     std::size_t nodes = 0;
     return J::parse(input, [&](int depth, J::parse_event_t event, J& value) {
@@ -290,7 +291,7 @@ J normalize(const std::string& format, std::string scope, J doc, std::string_vie
                     f["identifiers"] = r["properties"].value("rudyIdentifiers", J::array());
                     if (r["properties"].contains("rudyScope")) f["scope"] = r["properties"]["rudyScope"];
                 }
-                require(f["asset"]["id"] != "unlocated", "SARIF result requires a physical location or rudyAsset");
+                require((r.contains("locations") && !r["locations"].empty()) || (r.contains("properties") && r["properties"].contains("rudyAsset")), "SARIF result requires a physical location or rudyAsset");
                 require(!r.contains("suppressions") || r["suppressions"].empty(), "SARIF suppressions are unsupported");
                 add(std::move(f));
             }
@@ -347,10 +348,11 @@ J sarif(const J& b) {
             {"partialFingerprints", {{"rudy/v1", f["fingerprint"]}}},
             {"properties", {{"rudyScope", f["scope"]}, {"rudySeverity", s}, {"rudyTitle", f["title"]}, {"rudyAsset", f["asset"]},
                 {"rudyLocation", f["location"]}, {"rudyEvidence", f["evidence"]}, {"rudyIdentifiers", f["identifiers"]}}}};
-        if (f["asset"]["kind"] == "file" && f["location"].contains("path")) {
-            J loc{{"artifactLocation", {{"uri", uri_path(f["location"]["path"].get<std::string>())}}}};
+        if (f["asset"]["kind"] == "file") {
+            auto path = f["location"].value("path", f["asset"]["id"].get<std::string>());
+            J loc{{"artifactLocation", {{"uri", uri_path(path)}}}};
             if (f["location"].contains("line")) loc["region"] = {{"startLine", f["location"]["line"]}};
-            if (f["location"].contains("column")) loc["region"]["startColumn"] = f["location"]["column"];
+            if (f["location"].contains("line") && f["location"].contains("column")) loc["region"]["startColumn"] = f["location"]["column"];
             result["locations"] = J::array({{{"physicalLocation", loc}}});
         }
         groups[producer]["results"].push_back(std::move(result));
@@ -417,7 +419,6 @@ J execute(const J& request) {
 }
 std::string process(std::string_view request) {
     try {
-        require(request.find('\0') == std::string_view::npos, "NUL byte in JSON request");
         auto result = execute(parse(request)).dump();
         require(result.size() <= max_input_bytes, "Output exceeds 16 MiB"); return result;
     } catch (const J::exception&) { throw Error("Invalid JSON syntax or field type"); }
