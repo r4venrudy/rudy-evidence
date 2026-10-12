@@ -74,7 +74,8 @@ int main(int argc, char** argv) {
         else if (a[0] == "merge" && a.size() >= 2 && a.size() <= 129) {
             req = "{\"operation\":\"merge\",\"documents\":[";
             for (std::size_t i = 1; i < a.size(); ++i) {
-                if (i != 1) req += ','; req += read(a[i]);
+                if (i != 1) req += ',';
+                req += read(a[i]);
                 if (req.size() > rudy::evidence::max_input_bytes) throw rudy::evidence::Error("Combined input exceeds 16 MiB");
             }
             req += "]}";
