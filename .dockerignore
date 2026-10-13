@@ -1,0 +1,15 @@
+**
+!Dockerfile
+!CMakeLists.txt
+!cmake/**
+!include/**
+!src/**
+!tests/**
+!examples/**
+!vendor/**
+!LICENSE
+!THIRD_PARTY.md
+**/__pycache__/**
+**/*.pyc
+**/.env*
+**/*.key

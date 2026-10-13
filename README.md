@@ -62,6 +62,29 @@ Scopes are caller-selected stable identifiers, such as a repository URL or a hos
 
 CLI stdout contains JSON only; diagnostics go to stderr. Exit codes: `0` success, `1` rejected input/read error, `2` usage error, `3` internal/output error. Each command accepts `-` for stdin. See [`docs/CONTRACT.md`](docs/CONTRACT.md) for request formats and exact hashing rules, and [`docs/ADAPTERS.md`](docs/ADAPTERS.md) for supported subsets.
 
+## GitHub package
+
+The [GitHub container package](https://github.com/users/r4venrudy/packages/container/package/rudy-evidence) provides the Linux amd64 CLI, native libraries, headers, license notices and example inputs. It runs as UID 10001. Every publication verifies the vendored sources, runs the native/contract tests and exercises the installed CLI without network access on a read-only filesystem.
+
+```sh
+docker pull ghcr.io/r4venrudy/rudy-evidence:latest
+
+# Normalize the bundled synthetic example.
+docker run --rm --network none --read-only \
+  ghcr.io/r4venrudy/rudy-evidence:latest > bundle.json
+
+# Process a local report via stdin; no host directory mount is needed.
+docker run --rm -i --network none --read-only \
+  ghcr.io/r4venrudy/rudy-evidence:latest \
+  normalize semgrep repo:example - < examples/semgrep.json > findings.json
+docker run --rm -i --network none --read-only \
+  ghcr.io/r4venrudy/rudy-evidence:latest validate - < findings.json
+docker run --rm -i --network none --read-only \
+  ghcr.io/r4venrudy/rudy-evidence:latest sarif - < findings.json > findings.sarif
+```
+
+These shell examples use POSIX redirection. In PowerShell, bind-mount an input directory read-only at `/input` and pass `/input/report.json` instead of `-`; write stdout with UTF-8 encoding. Images are tagged `latest` and `sha-<full-commit>`; pin the published digest to keep an exact image. The native libraries in this image target Debian Linux, not Windows. CMake remains the integration path for native applications; this container does not publish NuGet or PyPI bindings.
+
 ## Embed it
 
 ### C++

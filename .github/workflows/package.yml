@@ -1,0 +1,68 @@
+name: Build and publish package
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/package.yml'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'src/**'
+      - 'include/**'
+      - 'tests/**'
+      - 'examples/**'
+      - 'LICENSE'
+      - 'vendor/**'
+      - 'THIRD_PARTY.md'
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/package.yml'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'src/**'
+      - 'include/**'
+      - 'tests/**'
+      - 'examples/**'
+      - 'LICENSE'
+      - 'vendor/**'
+      - 'THIRD_PARTY.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: package-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build image and run native test suite
+        run: docker build --pull --build-arg VCS_REF="$GITHUB_SHA" -t rudy-package:test .
+      - name: Test installed image offline
+        run: python3 tests/container_smoke.py rudy-package:test
+      - name: Publish tested image
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'r4venrudy/rudy-evidence'
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ghcr.io/r4venrudy/rudy-evidence
+        run: |
+          set -euo pipefail
+          trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          docker tag rudy-package:test "$IMAGE:sha-$GITHUB_SHA"
+          docker tag rudy-package:test "$IMAGE:latest"
+          docker push "$IMAGE:sha-$GITHUB_SHA"
+          docker push "$IMAGE:latest"
+          docker pull "$IMAGE:sha-$GITHUB_SHA"
+          python3 tests/container_smoke.py "$IMAGE:sha-$GITHUB_SHA"
+          docker image inspect "$IMAGE:sha-$GITHUB_SHA" --format '{{json .RepoDigests}}' >> "$GITHUB_STEP_SUMMARY"
