@@ -226,6 +226,13 @@ class Contract(unittest.TestCase):
             p = subprocess.run([CLI, *args], capture_output=True, timeout=30)
             self.assertEqual(p.returncode, code, p.stderr)
 
+    def test_cli_reads_standard_input_once(self):
+        bundle = json.dumps(normal()).encode()
+        for args in (["merge", "-", "-"], ["diff", "-", "-"]):
+            p = subprocess.run([CLI, *args], input=bundle, capture_output=True, timeout=30)
+            self.assertEqual((p.returncode, p.stdout), (1, b""), args)
+            self.assertIn(b"standard input", p.stderr)
+
     def test_unicode_file_paths_and_scope(self):
         with tempfile.TemporaryDirectory() as temp:
             path = pathlib.Path(temp) / "Türkçe-日本語.json"

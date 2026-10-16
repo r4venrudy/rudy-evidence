@@ -1,5 +1,6 @@
 #include "rudy/evidence.hpp"
 #include <nlohmann/json.hpp>
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <filesystem>
@@ -69,9 +70,12 @@ int main(int argc, char** argv) {
             req += a[0] == "normalize" ? ",\"document\":" + raw : ",\"text\":" + J(raw).dump(); req += '}';
         } else if ((a[0] == "validate" || a[0] == "sarif" || a[0] == "redact") && a.size() <= 2)
             req = "{\"operation\":" + J(a[0]).dump() + ",\"document\":" + read(a.size() == 2 ? a[1] : "-") + '}';
-        else if (a[0] == "diff" && a.size() == 3)
+        else if (a[0] == "diff" && a.size() == 3) {
+            // standard input can only be read once; a second "-" would silently read nothing
+            if (a[1] == "-" && a[2] == "-") throw rudy::evidence::Error("Only one input can be read from standard input");
             req = "{\"operation\":\"diff\",\"baseline\":" + read(a[1]) + ",\"document\":" + read(a[2]) + '}';
-        else if (a[0] == "merge" && a.size() >= 2 && a.size() <= 129) {
+        } else if (a[0] == "merge" && a.size() >= 2 && a.size() <= 129) {
+            if (std::count(a.begin() + 1, a.end(), std::string("-")) > 1) throw rudy::evidence::Error("Only one input can be read from standard input");
             req = "{\"operation\":\"merge\",\"documents\":[";
             for (std::size_t i = 1; i < a.size(); ++i) {
                 if (i != 1) req += ',';
