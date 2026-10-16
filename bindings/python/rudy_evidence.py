@@ -39,3 +39,22 @@ class Evidence:
 
     def normalize(self, format, scope, document):
         return self.process(dict(operation="normalize", format=format, scope=scope, document=document))
+
+    # The same operations the CLI offers, so callers don't have to build request objects by hand.
+    def normalize_lines(self, format, scope, text):
+        return self.process(dict(operation="normalize-lines", format=format, scope=scope, text=text))
+
+    def validate(self, bundle):
+        return self.process(dict(operation="validate", document=bundle))
+
+    def sarif(self, bundle):
+        return self.process(dict(operation="sarif", document=bundle))
+
+    def redact(self, document):
+        return self.process(dict(operation="redact", document=document))
+
+    def diff(self, baseline, current):
+        return self.process(dict(operation="diff", baseline=baseline, document=current))
+
+    def merge(self, *bundles):
+        return self.process(dict(operation="merge", documents=list(bundles)))

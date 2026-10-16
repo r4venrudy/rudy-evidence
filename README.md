@@ -124,6 +124,7 @@ string result = Rudy.Evidence.Evidence.Process(
 from rudy_evidence import Evidence
 sdk = Evidence()
 bundle = sdk.normalize("semgrep", "repo:example", report)
+sdk.validate(bundle); sdk.sarif(bundle); sdk.diff(baseline, bundle); sdk.merge(bundle, other)
 ```
 
 The C# project targets .NET 8+. Language bindings load a native library you supply; no NuGet or PyPI package is claimed to be published. C++ static libraries require a compatible compiler/runtime. Use the C ABI across compiler boundaries.
