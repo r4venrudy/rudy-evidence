@@ -55,7 +55,9 @@ J parse(std::string_view input) {
 }
 const std::set<std::string> sensitive_keys{
     "password", "passwd", "secret", "client_secret", "api_key", "apikey", "token", "access_token",
-    "refresh_token", "authorization", "proxy-authorization", "cookie", "set-cookie", "private_key"
+    "refresh_token", "authorization", "proxy-authorization", "cookie", "set-cookie", "private_key",
+    // header and environment-variable spellings of the same values
+    "x-api-key", "api-key", "client-secret", "private-key", "secret_key", "aws_secret_access_key"
 };
 bool space(char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\v' || c == '\f'; }
 bool boundary(char c) { return !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'); }
@@ -81,7 +83,8 @@ std::string redact_text(const std::string& input, std::size_t& count) {
             for (std::string_view prefix : {"ghp_", "gho_", "ghu_", "ghs_", "ghr_", "github_pat_", "glpat-",
                                             "xoxb-", "xoxp-", "xoxa-", "xoxs-", "sk_live_", "rk_live_", "npm_"})
                 if (input.compare(i, prefix.size(), prefix) == 0) { start = i; matched = true; }
-            for (std::string_view key : {"password", "passwd", "secret", "api_key", "apikey", "token", "access_token", "client_secret"}) {
+            for (std::string_view key : {"password", "passwd", "secret", "api_key", "apikey", "token", "access_token", "client_secret",
+                                         "secret_key", "aws_secret_access_key", "private_key"}) {
                 if (folded.compare(i, key.size(), key) != 0) continue;
                 auto p = i + key.size();
                 if (p < input.size() && (input[p] == '=' || input[p] == ':')) {

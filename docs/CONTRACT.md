@@ -43,8 +43,8 @@ These are resource bounds, not a hard wall-clock/memory guarantee. Applications 
 
 ## Builtin redaction v1
 
-Case-insensitive exact keys: password, passwd, secret, client_secret, api_key, apikey, token, access_token, refresh_token, authorization, proxy-authorization, cookie, set-cookie, private_key. Non-null values are replaced wholesale.
+Case-insensitive exact keys: password, passwd, secret, client_secret, api_key, apikey, token, access_token, refresh_token, authorization, proxy-authorization, cookie, set-cookie, private_key, x-api-key, api-key, client-secret, private-key, secret_key, aws_secret_access_key. Non-null values are replaced wholesale.
 
-Text patterns: Bearer/Basic credentials separated by a space; token prefixes for GitHub (ghp_, gho_, ghu_, ghs_, ghr_, github_pat_), GitLab (glpat-), Slack (xoxb-, xoxp-, xoxa-, xoxs-), Stripe live secret and restricted keys (sk_live_, rk_live_) and npm (npm_); password/passwd/secret/api_key/apikey/token/access_token/client_secret followed by `=` or `:`; URL userinfo before `@`. Whitespace and common punctuation terminate recognized text values. Matches become `[REDACTED]`; repeated processing is idempotent for these markers.
+Text patterns: Bearer/Basic credentials separated by a space; token prefixes for GitHub (ghp_, gho_, ghu_, ghs_, ghr_, github_pat_), GitLab (glpat-), Slack (xoxb-, xoxp-, xoxa-, xoxs-), Stripe live secret and restricted keys (sk_live_, rk_live_) and npm (npm_); password/passwd/secret/api_key/apikey/token/access_token/client_secret/secret_key/aws_secret_access_key/private_key followed by `=` or `:`; URL userinfo before `@`. Whitespace and common punctuation terminate recognized text values. Matches become `[REDACTED]`; repeated processing is idempotent for these markers.
 
 This is deliberately a limited pattern policy. It does not recognize every token, PEM block, custom header, encoded payload, address, personal identifier or arbitrary credential. It can produce false positives. Raw scanner fields are not copied unless explicitly selected by an adapter. Inspect output before sharing.
