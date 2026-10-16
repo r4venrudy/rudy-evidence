@@ -101,6 +101,8 @@ class Contract(unittest.TestCase):
         out = call(dict(operation="redact", document=doc))
         self.assertNotIn("synthetic", json.dumps(out))
         self.assertEqual(out["document"]["ordinary"], "hello")
+        tokens = call(dict(operation="redact", document="glpat-synthetic1 xoxb-synthetic-2 sk_live_synthetic3 npm_synthetic4 snpm_kept"))
+        self.assertEqual(tokens["document"], "[REDACTED] [REDACTED] [REDACTED] [REDACTED] snpm_kept")
         again = call(dict(operation="redact", document=out["document"]))
         self.assertEqual(again["replacements"], 0)
         self.assertEqual(again["document"], out["document"])

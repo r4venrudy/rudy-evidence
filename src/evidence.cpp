@@ -77,7 +77,9 @@ std::string redact_text(const std::string& input, std::size_t& count) {
         if (i == 0 || boundary(input[i - 1])) {
             if (folded.compare(i, 7, "bearer ") == 0) { start = i + 7; matched = true; }
             if (folded.compare(i, 6, "basic ") == 0) { start = i + 6; matched = true; }
-            for (std::string_view prefix : {"ghp_", "gho_", "ghu_", "ghs_", "ghr_", "github_pat_"})
+            // GitHub, GitLab, Slack, Stripe secret/restricted and npm tokens all start with a fixed prefix
+            for (std::string_view prefix : {"ghp_", "gho_", "ghu_", "ghs_", "ghr_", "github_pat_", "glpat-",
+                                            "xoxb-", "xoxp-", "xoxa-", "xoxs-", "sk_live_", "rk_live_", "npm_"})
                 if (input.compare(i, prefix.size(), prefix) == 0) { start = i; matched = true; }
             for (std::string_view key : {"password", "passwd", "secret", "api_key", "apikey", "token", "access_token", "client_secret"}) {
                 if (folded.compare(i, key.size(), key) != 0) continue;
